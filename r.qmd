@@ -1,5 +1,5 @@
 ---
-title: "r"
+title: "r Maps test"
 ---
 
 ## Quarto
@@ -7,5 +7,88 @@ title: "r"
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
 ```{r}
-1 + 1
+#|echo: false
+library(sf)
+library(raster)
+library(dplyr)
+library(spData)
+library(maps)
+# library(spDataLarge)
+
+library(tmap)    # for static and interactive maps
+library(ggplot2) # tidyverse data visualization package
+
+library("rnaturalearth")
+library("rnaturalearthdata")
 ```
+
+```{r}
+
+ukraine <- read_sf("ukraine.geojson")
+
+# threeC <- ukraine[ukraine$shapeName %in% c("Kherson Oblast", "Poland", "Ukraine"), ]
+# threeC$pop_est.m <- (1000) %>% sprintf("%.2f", .) %>% paste0("m")
+
+dw <- urban_agglomerations
+
+colors <- c()
+
+for(i in 1:27) {
+  if(i==4){
+    colors <- append(colors, "red")
+  } else {
+    colors <- append(colors, "white")
+  }
+}
+
+# colors[1] <- 1
+
+ukraine$colors <- colors 
+
+print(ukraine$colors)
+
+tm_shape(ukraine) +
+  tm_borders() +
+  # tm_polygons(col = "lightblue", palette = "cat") +
+  tm_fill("colors") 
+  tm_layout(legend.outside = FALSE) 
+  # tm_text("shapeName", size="AREA")+
+  # tm_facets(along = "year", free.coords = FALSE)
+
+
+  # tmap_animation(tm, "tm.gif", loop = TRUE, delay = 80)
+  
+
+```
+
+<!-- # 3D -->
+
+<!-- ```{r} -->
+
+<!-- library(rayshader) -->
+
+<!-- library(rgdal) -->
+
+<!-- #Here, I load a map with the raster package. -->
+
+<!-- loadzip = tempfile()  -->
+
+<!-- download.file("https://tylermw.com/data/dem_01.tif.zip", loadzip) -->
+
+<!-- localtif = raster::raster(unzip(loadzip, "dem_01.tif")) -->
+
+<!-- unlink(loadzip) -->
+
+<!-- #And convert it to a matrix: -->
+
+<!-- elmat = raster_to_matrix(localtif) -->
+
+<!-- #We use another one of rayshader's built-in textures: -->
+
+<!-- elmat %>% -->
+
+<!--   sphere_shade(texture = "desert") %>% -->
+
+<!--   plot_map() -->
+
+<!-- ``` -->
