@@ -57,19 +57,12 @@ oblasts <- c(oblasts, list(list(shapeISO="UA-35", name="Кіровоградсь
 oblasts <- c(oblasts, list(list(shapeISO="UA-30", name="м_Київ")))
 oblasts <- c(oblasts, list(list(shapeISO="UA-40", name="Sevastopol")))
 
-# populating data:
-# > one frame: 10 minutes
-# > 
-
-# just store the date & color after the date
 ```
 
 ```{r}
 
 ukraine <- read_sf("ukraine.geojson")
 
-# threeC <- ukraine[ukraine$shapeName %in% c("Kherson Oblast", "Poland", "Ukraine"), ]
-# threeC$pop_est.m <- (1000) %>% sprintf("%.2f", .) %>% paste0("m")
 
 dw <- urban_agglomerations
 
@@ -105,11 +98,6 @@ for(siren in all_sirens){
   d <- rbind(d, data.frame(colors=c("red"), shapeISO=c(oblast_iso)))
 }
 
-# colors[1] <- 1
-
-# ukraine$colors <- colors 
-
-# print(ukraine$colors)
 
 ukraine_sirens <- merge(ukraine, d, by="shapeISO")
 
@@ -128,34 +116,3 @@ tm_shape(ukraine_sirens) +
   # todo animate
 ```
 
-<!-- # 3D -->
-
-<!-- ```{r} -->
-
-<!-- library(rayshader) -->
-
-<!-- library(rgdal) -->
-
-<!-- #Here, I load a map with the raster package. -->
-
-<!-- loadzip = tempfile()  -->
-
-<!-- download.file("https://tylermw.com/data/dem_01.tif.zip", loadzip) -->
-
-<!-- localtif = raster::raster(unzip(loadzip, "dem_01.tif")) -->
-
-<!-- unlink(loadzip) -->
-
-<!-- #And convert it to a matrix: -->
-
-<!-- elmat = raster_to_matrix(localtif) -->
-
-<!-- #We use another one of rayshader's built-in textures: -->
-
-<!-- elmat %>% -->
-
-<!--   sphere_shade(texture = "desert") %>% -->
-
-<!--   plot_map() -->
-
-<!-- ``` -->
