@@ -22,6 +22,48 @@ library("rnaturalearth")
 library("rnaturalearthdata")
 ```
 
+
+```{r}
+
+source("load_data.R")
+
+oblasts <- list()
+
+oblasts <- c(oblasts, list(list(shapeISO="UA-65", name=list("Херсон", "Kherson Oblast"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-07", name=list("Волинська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-56", name=list("м_Рівне_та_Рівненська_територіальна_громада", "Рівненська_область", "Rivne Oblast"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-18", name=list("м_Житомир_та_Житомирська_територіальна_громада", "Житомирська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-32", name=list("Київська_область", "м_Біла_Церква_та_Білоцерківська_територіальна_громада", "Сквирська_територіальна_громада"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-74", name=list("Чернігівська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-59", name=list("Сумська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-63", name=list("Харківська_область", "Харківський_район"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-09", name=list("Луганська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-14", name=list("Бахмутський_район", "Донецька_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-23", name=list("Запорізька_область", "Оріхівська_територіальна_громада"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-46", name=list("Львівська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-26", name=list("ІваноФранківська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-21", name=list("Закарпатська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-61", name=list("Тернопільська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-77", name=list("Чернівецька_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-51", name=list("Одеська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-48", name=list("м_Вознесенськ_та_Вознесенська_територіальна_громада", "Кривоозерська_територіальна_громада", "Арбузинська_територіальна_громада", "Миколаївська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-43", name=list("Autonomous Republic of Crimea"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-05", name=list("Вінницька_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-68", name=list("Хмельницька_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-71", name=list("Черкаська_область", "Уманська_територіальна_громада"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-53", name=list("Полтавська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-12", name=list("м_Кривий_Ріг_та_Криворізька_територіальна_громада", "Дніпропетровська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-35", name=list("Кіровоградська_область"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-30", name=list("м_Київ"))))
+oblasts <- c(oblasts, list(list(shapeISO="UA-40", name=list("Sevastopol"))))
+
+# populating data:
+# > one frame: 10 minutes
+# > 
+
+# just store the date & color after the date
+```
+
 ```{r}
 
 ukraine <- read_sf("ukraine.geojson")
@@ -31,26 +73,49 @@ ukraine <- read_sf("ukraine.geojson")
 
 dw <- urban_agglomerations
 
-colors <- c()
 
-for(i in 1:27) {
-  if(i==4){
-    colors <- append(colors, "red")
-  } else {
-    colors <- append(colors, "white")
+d <- data.frame(colors=c(), shapeISO=c())
+
+for (oblast in oblasts){
+  d <- rbind(d, data.frame(colors=c("white"), shapeISO=c(oblast[["shapeISO"]])))
+}
+
+
+for(siren in all_sirens){
+  region <- siren[["region"]]
+  
+  oblast_iso <- ""
+  for(oblast in oblasts){
+    if(oblast_iso != ""){
+      break
+    }
+    
+    for(oblast_region in oblast[["name"]]){
+      if(oblast_region == region){
+        oblast_iso <- oblast[["shapeISO"]]
+        break
+      }
+    }
+  }
+  
+  if(oblast_iso == ""){
+    print("UNKNOWN LOCATION")
+    print(region)
   }
 }
 
 # colors[1] <- 1
 
-ukraine$colors <- colors 
+# ukraine$colors <- colors 
 
-print(ukraine$colors)
+# print(ukraine$colors)
 
-tm_shape(ukraine) +
+ukraine_sirens <- merge(ukraine, d, by="shapeISO")
+
+tm_shape(ukraine_sirens) +
   tm_borders() +
-  # tm_polygons(col = "lightblue", palette = "cat") +
-  tm_fill("colors") 
+  tm_polygons(col = "colors", palette = "cat") 
+  # tm_fill("colors") 
   tm_layout(legend.outside = FALSE) 
   # tm_text("shapeName", size="AREA")+
   # tm_facets(along = "year", free.coords = FALSE)
@@ -59,6 +124,7 @@ tm_shape(ukraine) +
   # tmap_animation(tm, "tm.gif", loop = TRUE, delay = 80)
   
 
+  # todo animate
 ```
 
 <!-- # 3D -->

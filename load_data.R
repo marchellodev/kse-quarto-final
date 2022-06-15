@@ -55,15 +55,15 @@ for(el in raw_data) {
     
   }
   
- rm(active)
- rm(active_entry)
- rm(el)
- rm(raw_data)
- rm(siren_entry)
- 
- rm(i)
- rm(message_type_raw)
- rm(region)
- rm(time)
- 
 }
+
+rm(active)
+rm(active_entry)
+rm(el)
+rm(raw_data)
+rm(siren_entry)
+
+rm(i)
+rm(message_type_raw)
+rm(region)
+rm(time)
