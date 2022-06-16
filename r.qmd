@@ -77,15 +77,15 @@ sirens_offset = 10*60
 
 
 # initial data
-for (oblast in oblasts){
-  color <- "white"
-  
-  if(oblast[["shapeISO"]] %in% c("UA-65", "UA-09", "UA-43", "UA-40")){
-    color <- "black"
-  }
-  
-  sirens_map <- rbind(sirens_map, data.frame(time=sirens_from, colors=c(color), shapeISO=c(oblast[["shapeISO"]])))
-}
+# for (oblast in oblasts){
+#   color <- "white"
+#   
+#   if(oblast[["shapeISO"]] %in% c("UA-65", "UA-09", "UA-43", "UA-40")){
+#     color <- "black"
+#   }
+#   
+#   sirens_map <- rbind(sirens_map, data.frame(time=sirens_from, colors=c(color), shapeISO=c(oblast[["shapeISO"]])))
+# }
 
 # current_time <- sirens_from
 # while(current_time < sirens_to){
@@ -139,6 +139,7 @@ for(siren in all_sirens){
 }
 
 
+sirens_map_filler <- data.frame(colors=c(), shapeISO=c())
 timer <- sirens_from
 
 # to-do finish this
@@ -156,14 +157,14 @@ while(timer <= sirens_to){
   
   for(oblast in oblasts){
     if(oblast[["shapeISO"]] %in% c("UA-65", "UA-09", "UA-43", "UA-40")){
-      sirens_map <- rbind(sirens_map, data.frame(time=timer, colors=c("black"), shapeISO=c((oblast[["shapeISO"]]))))
+      sirens_map_filler <- rbind(sirens_map_filler, data.frame(time=timer, colors=c("black"), shapeISO=c((oblast[["shapeISO"]]))))
     }
   }
   
   timer <- timer + sirens_step
 }
 
-
+sirens_map <- rbind(sirens_map, sirens_map_filler)
 ukraine_sirens <- merge(ukraine, sirens_map, by="shapeISO")
 
 
