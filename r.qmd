@@ -4,25 +4,165 @@ title: "r Maps test"
 
 ## Quarto
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-```{r}
-#|echo: false
-```
-
-
 ```{r}
 
+library(sf)
+library(av)
+library(tmap)    # for static and interactive maps
+library(ggplot2) # tidyverse data visualization package
+library(lubridate)
+
+source("src/load_data.R")
+source("src/oblasts.R")
+
+
+ukraine <- read_sf("data/ukraine.geojson")
+
+# Tuesday, March 15, 2022 12:00:01 AM GMT+02:00
+sirens_from <- 1647295200
+# Wednesday, June 15, 2022 0:00:01 GMT+03:00
+sirens_to <- 1655240400
+# frames: 4414
+sirens_step <- 60 * 60
+# sirens less than 10 minutes will not be shown
+sirens_offset <- 20 * 60
+
+# rows <- ((sirens_to-sirens_from)/sirens_step)*26
+# sirens_map <- data.frame(time = rep(NA, rows), colors = rep(NA, rows), shapeISO = rep(NA, rows))
+sirens_map <- data.frame(time = NULL, colors = NULL, shapeISO = NULL)
+
+
+for (siren in all_sirens) {
+  region <- siren[["region"]]
+
+  oblast_iso <- ""
+
+  for (oblast in oblasts) {
+    if (oblast[["name"]] == region) {
+      oblast_iso <- oblast[["shapeISO"]]
+      break
+    }
+  }
+  
+  if(oblast_iso == ""){
+    next
+  }
+
+  # find all standardized times [sirens_step + offset] that match and populate them as red
+
+  start <- siren[["start"]]
+  start_rounded <- ((start - sirens_offset) %/% sirens_step) * sirens_step
+  end <- siren[["end"]]
+  end_rounded <- ((end + sirens_offset) %/% sirens_step) * sirens_step
+  
+  sirens_map_local <- data.frame(time = NULL, colors = NULL, shapeISO = NULL)
+
+  timer <- start_rounded
+  while (timer <= end_rounded) {
+    if (timer >= sirens_from && timer <= sirens_to) {
+      # sirens_map[sirens_iterator, ] <- list(time = timer, colors = "red", shapeISO = oblast_iso)
+      # sirens_iterator <- sirens_iterator+1
+      sirens_map_local <- rbind(sirens_map_local, data.frame(time = as_datetime(timer, tz = "UTC+3"), colors = "red", shapeISO = oblast_iso))
+    }
+
+    timer <- timer + sirens_step
+  }
+  
+  sirens_map <- rbind(sirens_map, sirens_map_local)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+sirens_map_filler <- data.frame(time = NULL, colors = NULL, shapeISO = NULL)
+timer <- sirens_from
+
+# to-do finish this
+# to-do it does not look good :()
+while (timer <= sirens_to) {
+
+  time <- as_datetime(timer, tz = "UTC+3")
+  sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-65"))
+  sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-09"))
+  sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-43"))
+  sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-40"))
+
+  timer <- timer + sirens_step
+}
+
+sirens_map <- rbind(sirens_map, sirens_map_filler)
+
+
+
+
+
+
+
+
+
+
+
+# sirens_map_filler <- data.frame(colors = NULL, shapeISO = NULL)
+# timer <- sirens_from
+
+# filler_rows <- rows-ncol(sirens_map)
+# sirens_map_filler <- data.frame(time = rep(NA, filler_rows), colors = rep(NA, filler_rows), shapeISO = rep(NA, filler_rows))
+# filler_iterator <- 1
+# # to-do finish this
+# # to-do it does not look good :()
+# while (timer <= sirens_to) {
+#   added_oblasts <- sirens_map[sirens_map$time == timer, ]$shapeISO
+# 
+#   for (oblast in oblasts) {
+#     if (oblast[["shapeISO"]] %in% c("UA-65", "UA-09", "UA-43", "UA-40")) {
+#       sirens_map_filler[filler_iterator, ] <- list(time = timer, colors = "black", shapeISO = (oblast[["shapeISO"]]))
+#       filler_iterator <- filler_iterator+1
+#       
+#       # sirens_map <- rbind(sirens_map, data.frame(time = timer, colors = "black", shapeISO = (oblast[["shapeISO"]])))
+#     }
+#     # else if (!(oblast[["shapeISO"]] %in% added_oblasts)){
+#     #   # sirens_map[sirens_iterator, ] <- list(time = timer, colors = "white", shapeISO = (oblast[["shapeISO"]]))
+#     #   # sirens_iterator <- sirens_iterator+1
+#     #   sirens_map_filler[filler_iterator, ] <- list(time = timer, colors = "white", shapeISO = (oblast[["shapeISO"]]))
+#     #   filler_iterator <- filler_iterator+1
+#     #   # sirens_map <- rbind(sirens_map, data.frame(time = timer, colors = "white", shapeISO = (oblast[["shapeISO"]])))
+#     # }
+#   }
+# 
+#   timer <- timer + sirens_step
+# }
+# 
+# sirens_map <- rbind(sirens_map, sirens_map_filler)
+ukraine_sirens <- merge(ukraine, sirens_map, by = "shapeISO")
+
+
+tmap_mode("view")
+# ukraine2 = left_join(ukraine, sirens_map)
+# 
+# map <- st_as_sf(ukraine2, crs=st_crs(sirens_map))
+
+# https://sodp.org.uk/how-to-create-animated-maps-in-r/
+tm <- tm_shape(ukraine_sirens) +
+  tm_fill(col = "colors", palette = "cat") +
+  # tm_layout(legend.outside = FALSE) +
+  tm_facets(along = "time", free.coords	= FALSE) +
+  # tm_raster() +
+  tm_shape(ukraine) +
+  tm_borders()
+# tm_fill("colors")
+# tm_text("shapeName", size="AREA")+
+# tm_facets(along = "year", free.coords = FALSE)
+
+tmap_animation(tm, "vid.mp4", fps = 24, width = 1700, height = 1160)
+
+
 ```
-
-```{r}
-
-```
-![Vid](vid.mp4)
-
-
-
-
-
-
-

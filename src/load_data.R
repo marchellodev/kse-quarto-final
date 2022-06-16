@@ -11,7 +11,7 @@ library("rjson")
 library("tidyverse")
 
 # Reversing so that the data is in the chronological order
-raw_data <- rev(fromJSON(file = "data/sirens_demo.json"))
+raw_data <- rev(fromJSON(file = "data/sirens_all.json"))
 
 # active sirens
 active_sirens <- list()
