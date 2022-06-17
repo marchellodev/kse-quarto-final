@@ -18,14 +18,17 @@ source("src/oblasts.R")
 
 ukraine <- read_sf("data/ukraine.geojson")
 
+# 1647295200 - 1655240400:
+# 1647295200 -> 1651267800 [STEP 1]
+# 1651267800 -> 1655240400 [STEP 2]
 # Tuesday, March 15, 2022 12:00:01 AM GMT+02:00
 sirens_from <- 1647295200
 # Wednesday, June 15, 2022 0:00:01 GMT+03:00
-sirens_to <- 1655240400
+sirens_to <- 1651267800
 # frames: 4414
-sirens_step <- 60 * 60
+sirens_step <- 30 * 60
 # sirens less than 10 minutes will not be shown
-sirens_offset <- 20 * 60
+sirens_offset <- 10 * 60
 
 # rows <- ((sirens_to-sirens_from)/sirens_step)*26
 # sirens_map <- data.frame(time = rep(NA, rows), colors = rep(NA, rows), shapeISO = rep(NA, rows))
@@ -62,7 +65,7 @@ for (siren in all_sirens) {
     if (timer >= sirens_from && timer <= sirens_to) {
       # sirens_map[sirens_iterator, ] <- list(time = timer, colors = "red", shapeISO = oblast_iso)
       # sirens_iterator <- sirens_iterator+1
-      sirens_map_local <- rbind(sirens_map_local, data.frame(time = as_datetime(timer, tz = "UTC+3"), colors = "red", shapeISO = oblast_iso))
+      sirens_map_local <- rbind(sirens_map_local, data.frame(time = as_datetime(timer, tz = "UTC"), colors = "red", shapeISO = oblast_iso))
     }
 
     timer <- timer + sirens_step
@@ -90,7 +93,7 @@ timer <- sirens_from
 # to-do it does not look good :()
 while (timer <= sirens_to) {
 
-  time <- as_datetime(timer, tz = "UTC+3")
+  time <- as_datetime(timer, tz = "UTC")
   sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-65"))
   sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-09"))
   sirens_map_filler <- rbind(sirens_map_filler, data.frame(time = time, colors = "black", shapeISO = "UA-43"))
@@ -152,9 +155,9 @@ tmap_mode("view")
 
 # https://sodp.org.uk/how-to-create-animated-maps-in-r/
 tm <- tm_shape(ukraine_sirens) +
-  tm_fill(col = "colors", palette = "cat") +
+  tm_polygons(col = "colors", palette = "cat") +
   # tm_layout(legend.outside = FALSE) +
-  tm_facets(along = "time", free.coords	= FALSE) +
+  tm_facets(along = "time", as.layers = TRUE) +
   # tm_raster() +
   tm_shape(ukraine) +
   tm_borders()

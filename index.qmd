@@ -1,0 +1,29 @@
+---
+title: "The history of air raid sirens in Ukraine"
+author: "Mark Motliuk"
+format: revealjs
+---
+
+## The Why
+- What is happening in Ukraine.
+- Understanding the enemy's strategy [analyzing air strikes & air raid sirens]
+
+## The What
+| The input | The output |
+|---------|:-----|
+| ![](assets/telegram_channel.jpg) | ![](assets/map.jpg) |
+
+## Key takeaways
+-   `rbind` is extremely slow
+-   `tmap_animation` & `tmap_save` eat up a lot of RAM (>30Gb for 150 000 data entries)
+
+## The demo
+
+![](assets/vid.gif)
+\
+
+- 1 day = 2 seconds
+
+- it is not yet finished [>200 loc]
+
+## Thank you so much <3
